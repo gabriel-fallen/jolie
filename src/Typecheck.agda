@@ -1,5 +1,6 @@
 module Typecheck where
 
+open import Data.List using ([])
 open import Data.Maybe using (Maybe; just; nothing)
 open import Function
 open import Expr
@@ -7,6 +8,9 @@ open import Type
 open import Behaviour
 open import Variable
 
+data _⊢_▸_ : Γ → Behaviour → Γ → Set where
+  t-nil : {γ : Γ} → γ ⊢ nil ▸ γ
+--  t-if-then : 
 
 typecheck_behaviour : Γ → Behaviour → Maybe Γ
 typecheck_behaviour env nil = just env
