@@ -12,5 +12,5 @@ data BinOp : Set where
 
 data Expr : Set where
   var : Variable → Expr
-  binary : BinOp → Variable → Variable → Expr
+  binary : BinOp → Expr → Expr → Expr
   constant : Variable.Value → Expr
