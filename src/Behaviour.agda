@@ -1,6 +1,5 @@
 module Behaviour where
 
-open import Data.Maybe using (Maybe)
 open import Data.String using (String)
 open import Data.List using (List)
 open import Data.Product using (_×_)
@@ -22,7 +21,7 @@ data Input_ex : Set where
 data Behaviour where
   input : Input_ex → Behaviour
   output : Output_ex → Behaviour
-  if : Expr → Behaviour → Maybe Behaviour → Behaviour
+  if : Expr → Behaviour → Behaviour → Behaviour
   while : Expr → Behaviour → Behaviour
   seq : Behaviour → Behaviour → Behaviour
   par : Behaviour → Behaviour → Behaviour
