@@ -47,6 +47,5 @@ data TypeDecl : Set where
   empty : TypeDecl
   pair : TypeDecl → TypeDecl → TypeDecl
 
-Γ : Set
-Γ = List TypeDecl
-
+Ctx : Set
+Ctx = List TypeDecl

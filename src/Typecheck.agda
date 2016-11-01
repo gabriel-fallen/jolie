@@ -1,19 +1,18 @@
 module Typecheck where
 
-open import Data.List using ([])
-open import Data.Maybe using (Maybe; just; nothing)
 open import Function
 open import Expr
 open import Type
 open import Behaviour
 open import Variable
 
-data _⊢_▸_ : Γ → Behaviour → Γ → Set where
-  t-nil : {γ : Γ} → γ ⊢ nil ▸ γ
---  t-if-then : 
 
-typecheck_behaviour : Γ → Behaviour → Maybe Γ
-typecheck_behaviour env nil = just env
+data Check (Γ : Ctx) : Behaviour → Set where
+  yes : {b : Behaviour} → Check Γ b
+  no : {b : Behaviour} → Check Γ b
+
+typecheck_behaviour : (Γ : Ctx) → (b : Behaviour) → Check Γ b
+typecheck_behaviour env nil = yes
 typecheck_behaviour env (if e b1 maybe_b2) =
   case e of λ
   {
@@ -21,6 +20,6 @@ typecheck_behaviour env (if e b1 maybe_b2) =
     (var v) →
       let ctx1 = typecheck_behaviour env b1 in
       {!!}
-  ; _ → nothing
+  ; _ → no
   }
-typecheck_behaviour _ _ = nothing
+typecheck_behaviour _ _ = no
