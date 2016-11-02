@@ -1,7 +1,10 @@
 module Typecheck where
 
-import Relation.Binary.PropositionalEquality as PropEq
+import Data.Vec.Equality as VecEq
+open import Relation.Binary.PropositionalEquality as PropEq using (decSetoid)
+open import Relation.Nullary.Decidable using (⌊_⌋)
 open import Data.Maybe using (Maybe; just; nothing)
+open import Data.Nat using (ℕ)
 open import Data.Bool using (if_then_else_)
 open import Data.Product using (_,_)
 open import Function
@@ -22,11 +25,11 @@ type_of_var : Variable → Maybe BasicType
 type_of_var (leaf _ v) = just $ type_of_value v
 type_of_var _ = nothing
 
-data Check (Γ : Ctx) : Behaviour → Set where
+data Check {n} (Γ : Ctx n) : Behaviour → Set where
   yes : {b : Behaviour} → Check Γ b
   no : {b : Behaviour} → Check Γ b
 
-typecheck_behaviour : (Γ : Ctx) → (b : Behaviour) → Check Γ b
+typecheck_behaviour : {n : ℕ} (Γ : Ctx n) → (b : Behaviour) → Check Γ b
 typecheck_behaviour ctx nil = yes
 typecheck_behaviour ctx (if e b1 b2) =
   case e of λ
@@ -38,7 +41,8 @@ typecheck_behaviour ctx (if e b1 b2) =
       -- If e : bool
       { (just bool) →
         let ctx2 = typecheck_behaviour ctx b2 in
-        {!!}
+        let module CtxEq = VecEq.DecidableEquality Data.Bool.decSetoid in
+        if ⌊ ctx1 CtxEq.≟ ctx2 ⌋ then yes else no
       ; _ → no
       }
       --case ()

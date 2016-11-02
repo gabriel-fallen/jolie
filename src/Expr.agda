@@ -6,11 +6,7 @@ open import Variable
 
 -- TODO: add logic operations and, or
 data BinOp : Set where
-  plus : BinOp
-  minus : BinOp
-  mult : BinOp
-  div : BinOp
-  power : BinOp
+  plus minus mult div power : BinOp
 
 data Expr : Set where
   var : Variable → Expr
