@@ -2,8 +2,10 @@ module Type where
 
 open import Relation.Nullary
 open import Relation.Binary
-open import Relation.Binary.PropositionalEquality as PropEq using (_≡_; refl)
+open import Relation.Binary.PropositionalEquality as PropEq using (_≡_; refl; cong; cong₂)
+open import Function using (_∘_)
 open import Data.Nat using (ℕ)
+open import Data.Empty
 open import Data.String using (String)
 open import Data.List using (List)
 open import Data.Vec using (Vec)
@@ -87,11 +89,15 @@ data TypeTree where
   leaf : BasicType → TypeTree
   node : BasicType → List ChildType → TypeTree
 
+get-basic : TypeTree → BasicType
+get-basic (leaf b) = b
+get-basic (node b _) = b
+
 module TypeTreeEq where
   _≟_ : Decidable {A = TypeTree} _≡_
   (leaf b1) ≟ (leaf b2) with BasicTypeEq._≟_ b1 b2
-  ... | yes b1≡b2 = {!!}
-  ... | no ¬b1≡b2 = no {!!}
+  ... | yes b1≡b2 = yes (cong leaf b1≡b2)
+  ... | no b1≢b2 = no {!!} -- ¬ leaf b1 ≡ leaf b2
   (node b1 cts) ≟ (node b2 cts') = {!!}
   (leaf _) ≟ (node _ _) = no λ ()
   (node _ _) ≟ (leaf _) = no λ ()
