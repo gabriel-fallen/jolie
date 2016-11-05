@@ -1,7 +1,8 @@
 module Behaviour where
 
+open import Data.Nat using (ℕ)
 open import Data.String using (String)
-open import Data.List using (List)
+open import Data.Vec using (Vec)
 open import Data.Product using (_×_)
 open import Variable
 open import Expr
@@ -27,7 +28,7 @@ data Behaviour where
   par : Behaviour → Behaviour → Behaviour
   assign : Variable → Expr → Behaviour
   nil : Behaviour
-  inputchoice : List (Input_ex × Behaviour) → Behaviour
+  inputchoice : {n : ℕ} → Vec (Input_ex × Behaviour) n → Behaviour
   wait : Channel → Operation → Location → Variable → Behaviour
   exec : Channel → Operation → Variable → Behaviour → Behaviour
 

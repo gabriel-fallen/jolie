@@ -1,51 +1,51 @@
 module Typecheck where
 
 import Data.Vec.Equality as VecEq
-open import Relation.Binary.PropositionalEquality as PropEq using (decSetoid)
-open import Relation.Nullary.Decidable using (⌊_⌋)
-open import Data.Maybe using (Maybe; just; nothing)
+open import Relation.Binary.PropositionalEquality as PropEq using (_≡_)
 open import Data.Nat using (ℕ)
-open import Data.Bool using (if_then_else_)
-open import Data.Product using (_,_)
-open import Function
+open import Data.Vec using (Vec; _∈_; zip)
 open import Expr
 open import Type
 open import Behaviour
 open import Variable
 
 
-type_of_value : Value → BasicType
-type_of_value (Value.string _) = Type.string
-type_of_value (Value.int _) = Type.int
-type_of_value (Value.bool _) = Type.bool
-type_of_value (Value.double _) = Type.double
-type_of_value (Value.long _) = Type.long
+data _⊢_of_ {n : ℕ} (Γ : Ctx n) : Variable → TypeTree → Set where
+  var-t : {s : Variable} {b : TypeTree} 
+        → Γ ⊢ s of b
 
-type_of_var : Variable → Maybe BasicType
-type_of_var (leaf _ v) = just $ type_of_value v
-type_of_var _ = nothing
+data _⊢_▹_ {n m : ℕ} (Γ : Ctx n) : Behaviour → (Γ₁ : Ctx m) → Set where 
+  t-nil : {Γ₁ : Ctx m}
+        → n ≡ m
+        -------------
+        → Γ ⊢ nil ▹ Γ₁
+          
+  t-if : {Γ₁ : Ctx m} {b1 b2 : Behaviour} {e : Variable}
+       → Γ ⊢ e of (leaf bool) -- Γ ⊢ e : bool
+       → Γ ⊢ b1 ▹ Γ₁
+       → Γ ⊢ b2 ▹ Γ₁
+       -------------
+       → Γ ⊢ if (var e) b1 b2 ▹ Γ₁
+          
+  t-while : {Γ₁ : Ctx m} {b : Behaviour} {e : Variable}
+          → Γ ⊢ e of (leaf bool)
+          → Γ ⊢ b ▹ Γ₁
+          ----------------------
+          → Γ ⊢ while (var e) b ▹ Γ₁
+          
+  t-choice : {Γ₁ : Ctx m} {k n : ℕ}  {η : Input_ex} {inputs : Vec Input_ex n} {b : Behaviour} {behaviours : Vec Behaviour n}
+           → η ∈ inputs
+           → b ∈ behaviours
+           → Γ ⊢ seq (input η) b ▹ Γ₁
+           --------------------------
+           → Γ ⊢ inputchoice (zip inputs behaviours) ▹ Γ₁
 
-data Check {n} (Γ : Ctx n) : Behaviour → Set where
-  yes : {b : Behaviour} → Check Γ b
-  no : {b : Behaviour} → Check Γ b
+  --t-par
 
-typecheck_behaviour : {n : ℕ} (Γ : Ctx n) → (b : Behaviour) → Check Γ b
-typecheck_behaviour ctx nil = yes
-typecheck_behaviour ctx (if e b1 b2) =
-  case e of λ
-  {
-    -- If conditional expression is variable
-    (var v) →
-      let ctx1 = typecheck_behaviour ctx b1 in
-      case (type_of_var v) of λ
-      -- If e : bool
-      { (just bool) →
-        let ctx2 = typecheck_behaviour ctx b2 in
-        let module CtxEq = VecEq.DecidableEquality Data.Bool.decSetoid in
-        if ⌊ ctx1 CtxEq.≟ ctx2 ⌋ then yes else no
-      ; _ → no
-      }
-      --case ()
-  ; _ → no
-  }
-typecheck_behaviour _ _ = no
+  t-seq : {k : ℕ} {Γ₁ : Ctx k} {Γ₂ : Ctx m} {b1 b2 : Behaviour}
+        → Γ ⊢ b1 ▹ Γ₁
+        → Γ₁ ⊢ b2 ▹ Γ₂
+        --------------
+        → Γ ⊢ seq b1 b2 ▹ Γ₂
+
+  
