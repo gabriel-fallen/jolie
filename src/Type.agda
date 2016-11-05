@@ -56,3 +56,29 @@ data _⊆_ : TypeTree → TypeTree → Set where
 
 Ctx : ℕ → Set
 Ctx = Vec TypeDecl
+
+roots : {n : ℕ} → Ctx n → List Name
+roots xs = go xs
+  where
+    open import Data.List using ([]; _∷_)
+
+    go : {n : ℕ} → Ctx n → List Name
+    go Vec.[] = []
+    go (Vec._∷_ x xs) =
+      case x of λ
+        { (var v t) → (root v) ∷ (roots xs)
+        ; _ → roots xs
+        }
+
+intersect-roots : List Name → List Name → List Name
+intersect-roots xs ys = intersect xs ys
+  where
+    open import Data.List using ([]; _∷_)
+    open import Data.String using (_≟_)
+
+    intersect : List Name → List Name → List Name
+    intersect [] _ = []
+    intersect _ [] = []
+    intersect (x ∷ xs) (y ∷ ys) with x ≟ y
+    ... | yes x≡y = x ∷ intersect xs ys
+    ... | no _ = intersect xs ys

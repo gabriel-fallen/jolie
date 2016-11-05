@@ -1,5 +1,6 @@
 module Typecheck where
 
+import Data.List as List
 import Data.Vec.Equality as VecEq
 open import Relation.Binary.PropositionalEquality as PropEq using (_≡_)
 open import Data.Nat using (ℕ; _+_)
@@ -45,7 +46,8 @@ data _⊢_▹_ {n m : ℕ} (Γ : Ctx n) : Behaviour → (Γ₁ : Ctx m) → Set 
           {Γ₁ : Ctx k} {Γ₁' : Ctx k₁} {Γ₂ : Ctx p} {Γ₂' : Ctx p₁} {Γ' : Ctx m}
         → Γ₁ ⊢ b1 ▹ Γ₁'
         → Γ₂ ⊢ b2 ▹ Γ₂'
-        -- TODO: Express that Γ = Γ₁, Γ₂ and Γ' = Γ₁', Γ₂' - disjoint unions
+        → intersect-roots (roots Γ₁') (roots Γ₂') ≡ List.[]
+        -- TODO: maybe it's not enough to express that Γ = Γ₁, Γ₂ and Γ' = Γ₁', Γ₂' - disjoint unions
         ---------------
         → Γ ⊢ par b1 b2 ▹ Γ'
 

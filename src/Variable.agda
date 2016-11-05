@@ -22,3 +22,6 @@ data Variable : Set where
   leaf : Name → Value → Variable
   node : Name → Maybe Value → List Variable → Variable
 
+root : Variable → Name
+root (leaf n _) = n
+root (node n _ _) = n
