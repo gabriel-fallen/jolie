@@ -51,5 +51,8 @@ data TypeDecl : Set where
   empty : TypeDecl
   pair : TypeDecl → TypeDecl → TypeDecl
 
+data _⊆_ : TypeTree → TypeTree → Set where
+  sub : {T₁ T₂ : TypeTree} → T₁ ⊆ T₂
+
 Ctx : ℕ → Set
 Ctx = Vec TypeDecl
