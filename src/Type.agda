@@ -82,3 +82,9 @@ intersect-roots xs ys = intersect xs ys
     intersect (x ∷ xs) (y ∷ ys) with x ≟ y
     ... | yes x≡y = x ∷ intersect xs ys
     ... | no _ = intersect xs ys
+
+
+upd : {n m : ℕ} → Ctx n → Variable → TypeTree → Ctx m
+upd Γ x Tₓ =
+  let r = root x in
+  {!!}
