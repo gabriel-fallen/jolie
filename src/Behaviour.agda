@@ -11,13 +11,13 @@ open import Type
 
 data Output_ex : Set where
   notification : Operation → Location → Expr → Output_ex
-  solicitRes : Operation → Location → Expr → Variable → Output_ex
+  solicitres : Operation → Location → Expr → Variable → Output_ex
 
 data Behaviour : Set
 
 data Input_ex : Set where
   oneway : Operation → Variable → Input_ex
-  reqRes : Operation → Variable → Variable → Behaviour → Input_ex
+  reqres : Operation → Variable → Variable → Behaviour → Input_ex
 
 data Behaviour where
   input : Input_ex → Behaviour

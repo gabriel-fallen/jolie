@@ -4,12 +4,13 @@ open import Level
 open import Relation.Nullary
 open import Relation.Binary
 open import Relation.Binary.PropositionalEquality as PropEq using (_≡_; refl; cong; cong₂)
+open import Relation.Nullary.Decidable using (⌊_⌋)
 open import Function
 open import Data.Nat using (ℕ)
 open import Data.Empty
 open import Data.String using (String)
-open import Data.List using (List)
-open import Data.Vec using (Vec)
+open import Data.List using (List; filter)
+open import Data.Vec using (Vec; toList)
 open import Expr
 open import Variable
 
@@ -23,68 +24,20 @@ Location = String
 Channel : Set
 Channel = String
 
-data Cardinality : Set where
-  oo oi ii : Cardinality
-
-data BasicType : Set where
-  bool int double long string raw void : BasicType
-
-data TypeTree : Set
-
-data ChildType : Set where
-  child : String → Cardinality → TypeTree → ChildType
-
-data TypeTree where
-  leaf : BasicType → TypeTree
-  node : BasicType → List ChildType → TypeTree
-
-get-basic : TypeTree → BasicType
-get-basic (leaf b) = b
-get-basic (node b _) = b
+data Type : Set where
+  bool int double long string raw void : Type
 
 data TypeDecl : Set where
-  outNotify : Operation → Location → TypeTree → TypeDecl
-  outSolRes : Operation → Location → TypeTree → TypeTree → TypeDecl
-  inOneWay : Operation → TypeTree → TypeDecl
-  inReqRes : Operation → TypeTree → TypeTree → TypeDecl
-  var : Variable → TypeTree → TypeDecl
+  outNotify : Operation → Location → Type → TypeDecl
+  outSolRes : Operation → Location → Type → Type → TypeDecl
+  inOneWay : Operation → Type → TypeDecl
+  inReqRes : Operation → Type → Type → TypeDecl
+  var : Variable → Type → TypeDecl
   empty : TypeDecl
   pair : TypeDecl → TypeDecl → TypeDecl
 
-data _⊆_ : TypeTree → TypeTree → Set where
-  sub : {T₁ T₂ : TypeTree} → T₁ ⊆ T₂
+data _⊆_ : Type → Type → Set where
+  sub : {T₁ T₂ : Type} → T₁ ⊆ T₂
 
 Ctx : ℕ → Set
 Ctx = Vec TypeDecl
-
-roots : {n : ℕ} → Ctx n → List Name
-roots xs = go xs
-  where
-    open import Data.List using ([]; _∷_)
-
-    go : {n : ℕ} → Ctx n → List Name
-    go Vec.[] = []
-    go (Vec._∷_ x xs) =
-      case x of λ
-        { (var v t) → (root v) ∷ (roots xs)
-        ; _ → roots xs
-        }
-
-intersect-roots : List Name → List Name → List Name
-intersect-roots xs ys = intersect xs ys
-  where
-    open import Data.List using ([]; _∷_)
-    open import Data.String using (_≟_)
-
-    intersect : List Name → List Name → List Name
-    intersect [] _ = []
-    intersect _ [] = []
-    intersect (x ∷ xs) (y ∷ ys) with x ≟ y
-    ... | yes x≡y = x ∷ intersect xs ys
-    ... | no _ = intersect xs ys
-
-
-upd : {n m : ℕ} → Ctx n → Variable → TypeTree → Ctx m
-upd Γ x Tₓ =
-  let r = root x in
-  {!!}
