@@ -6,10 +6,11 @@ open import Data.Product using (_×_)
 open import Data.Maybe using (Maybe)
 open import Data.List using (List)
 open import Data.Bool using (Bool)
+open import Data.Nat using (ℕ)
 
 
-Name : Set
-Name = String
+Variable : Set
+Variable = ℕ
 
 data Value : Set where
   string : String → Value
@@ -17,8 +18,4 @@ data Value : Set where
   bool : Bool → Value
   double : ℤ × ℤ → Value
   long : ℤ → Value
-
-data Variable : Set where
-  leaf : Name → Value → Variable
-  node : Name → Maybe Value → List Variable → Variable
-
+  void : Value
