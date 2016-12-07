@@ -13,9 +13,6 @@ open import Behaviour
 open import Variable
 
 
-substCtx : {n m : ℕ} → n ≡ m → Ctx n → Ctx m
-substCtx n≡m Γ = subst (λ x → Vec TypeDecl x) n≡m Γ
-
 data _⊢_∶_ {n : ℕ} (Γ : Ctx n) : Variable → Type → Set where
   var-t : {s : Variable} {b : Type}
         → (var s b) ∈ Γ
@@ -29,7 +26,7 @@ data _⊢ₑ_of_ {n : ℕ} (Γ : Ctx n) : Expr → Type → Set where
 data _⊢B_▹_ {n m : ℕ} (Γ : Ctx n) : Behaviour →  Ctx m → Set where
   t-nil : {n≡m : n ≡ m}
         ---------------------------
-        → Γ ⊢B nil ▹ substCtx n≡m Γ
+        → Γ ⊢B nil ▹ subst Ctx n≡m Γ
           
   t-if : {Γ₁ : Ctx m} {b1 b2 : Behaviour} {e : Variable}
        → Γ ⊢ e ∶ bool -- Γ ⊢ e : bool
@@ -42,7 +39,7 @@ data _⊢B_▹_ {n m : ℕ} (Γ : Ctx n) : Behaviour →  Ctx m → Set where
           → Γ ⊢ e ∶ bool
           → Γ ⊢B b ▹ Γ
           --------------------------
-          → Γ ⊢B while (var e) b ▹ substCtx n≡m Γ
+          → Γ ⊢B while (var e) b ▹ subst Ctx n≡m Γ
           
   t-choice : {Γ₁ : Ctx m} {k n : ℕ}  {η : Input_ex} {inputs : Vec Input_ex n}
              {b : Behaviour} {behaviours : Vec Behaviour n}
@@ -71,7 +68,7 @@ data _⊢B_▹_ {n m : ℕ} (Γ : Ctx n) : Behaviour →  Ctx m → Set where
                  → Γ ⊢ e ∶ Tₑ
                  → Tₑ ⊆ T₀
                  -------------------------------------------
-                 → Γ ⊢B output (notification o l (var e)) ▹ substCtx n≡m Γ
+                 → Γ ⊢B output (notification o l (var e)) ▹ subst Ctx n≡m Γ
 
   t-assign-new : {Γ₁ : Ctx m} {x : Variable} {e : Expr} {Tₓ Tₑ : Type}
                → Γ ⊢ₑ e of Tₑ -- Γ ⊢ e : bool
@@ -85,7 +82,7 @@ data _⊢B_▹_ {n m : ℕ} (Γ : Ctx n) : Behaviour →  Ctx m → Set where
                   → (var x Tₓ) ∈ Γ
                   → Tₑ ≡ Tₓ
                   ---------------------
-                  → Γ ⊢B assign x e ▹ substCtx n≡m Γ
+                  → Γ ⊢B assign x e ▹ subst Ctx n≡m Γ
 
   t-oneway-new : {Γ₁ : Ctx m} {Tₓ Tᵢ : Type} {o : Operation} {x : Variable}
                → (inOneWay o Tᵢ) ∈ Γ
@@ -99,7 +96,7 @@ data _⊢B_▹_ {n m : ℕ} (Γ : Ctx n) : Behaviour →  Ctx m → Set where
                   → ((var x Tₓ) ∈ Γ)
                   → Tᵢ ⊆ Tₓ
                   --------------------------------
-                  → Γ ⊢B (input (oneway o x)) ▹ substCtx n≡m Γ
+                  → Γ ⊢B (input (oneway o x)) ▹ subst Ctx n≡m Γ
 
   t-solresp-new : {Γ₁ : Ctx m} {o : Operation} {l : Location} {Tₒ Tᵢ Tₑ Tₓ : Type} {e : Expr} {x : Variable}
                 → (outSolRes o l Tₒ Tᵢ) ∈ Γ
@@ -115,7 +112,7 @@ data _⊢B_▹_ {n m : ℕ} (Γ : Ctx n) : Behaviour →  Ctx m → Set where
                    → (var x Tₓ) ∈ Γ
                    → Tᵢ ⊆ Tₓ
                    -----------------------------------------
-                   → Γ ⊢B (output (solicitres o l e x)) ▹ substCtx n≡m Γ
+                   → Γ ⊢B (output (solicitres o l e x)) ▹ subst Ctx n≡m Γ
 
   t-reqresp-new : {p : ℕ} {Γₓ : Ctx p} {Γ₁ : Ctx m} {o : Operation} {Tᵢ Tₒ Tₓ Tₐ : Type} {x a : Variable} {b : Behaviour}
                 → (inReqRes o Tᵢ Tₒ) ∈ Γ
