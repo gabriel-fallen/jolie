@@ -1,5 +1,6 @@
 module Service where
 
+open import Data.Nat using (ℕ)
 open import Data.List using (List)
 open import Data.String using (String)
 open import Data.Product using (_×_)
@@ -22,8 +23,8 @@ data Process : Set where
 
 data AliasingFunction : Set where
 
-Deployment : Set
-Deployment = AliasingFunction × Γ
+Deployment : {m : ℕ} → Set
+Deployment {m} = AliasingFunction × Ctx m
 
 data Service : Set where
-  service : Behaviour → Deployment → Process → Service
+  service : {m : ℕ} → Behaviour → Deployment {m} → Process → Service
