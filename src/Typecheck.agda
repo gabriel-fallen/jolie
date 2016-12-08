@@ -137,16 +137,7 @@ data _⊢B_▹_ {n m : ℕ} (Γ : Ctx n) : Behaviour → Ctx m → Set where
 check-B : {n m : ℕ} {Γ₁ : Ctx m} → (Γ : Ctx n) → (b : Behaviour) → Dec (Γ ⊢B b ▹ Γ₁)
 check-B {n} {m} {Γ₁} Γ (if e b1 b2) with check-B Γ b1 | check-B Γ b2
 ... | yes ctx₁ | yes ctx₂ = yes (t-if expr-t ctx₁ ctx₂)
-... | yes _ | no ¬p = no lem
-  where
-    lem : ¬ Γ ⊢B if e b1 b2 ▹ Γ₁
-    lem (t-if _ _ c₂) = ¬p c₂
-... | no ¬p | yes _ = no lem
-  where
-    lem : ¬ Γ ⊢B if e b1 b2 ▹ Γ₁
-    lem (t-if _ c₁ _) = ¬p c₁
-... | no _ | no ¬2 = no lem
-  where
-    lem : ¬ Γ ⊢B if e b1 b2 ▹ Γ₁
-    lem (t-if _ _ c₂) = ¬2 c₂
+... | yes _ | no ¬p = no (λ {(t-if _ _ c₂) → ¬p c₂})
+... | no ¬p | yes _ = no (λ {(t-if _ c₁ _) → ¬p c₁})
+... | no _ | no ¬p = no (λ {(t-if _ _ c₂) → ¬p c₂})
 check-B Γ b = {!!}
