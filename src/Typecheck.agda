@@ -4,9 +4,9 @@ import Data.List as List
 import Data.Vec.Equality as VecEq
 open import Relation.Nullary using (¬_)
 open import Relation.Nullary
-open import Relation.Binary.PropositionalEquality as PropEq using (_≡_; subst)
-open import Data.Nat using (ℕ; _+_; suc)
-open import Data.Vec using (Vec; _∈_; zip; _∷_)
+open import Relation.Binary.PropositionalEquality as PropEq using (_≡_; subst; refl)
+open import Data.Nat using (ℕ; _+_; suc; _≟_)
+open import Data.Vec using (Vec; _∈_; zip; _∷_; here)
 open import Expr
 open import Type
 open import Behaviour
@@ -19,21 +19,21 @@ data _⊢_∶_ {n : ℕ} (Γ : Ctx n) : Variable → Type → Set where
         ------------
         → Γ ⊢ s ∶ b
 
-data _⊢ₑ_of_ {n : ℕ} (Γ : Ctx n) : Expr → Type → Set where
+data _⊢ₑ_∶_ {n : ℕ} (Γ : Ctx n) : Expr → Type → Set where
   expr-t : {s : Expr} {b : Type}
-         → Γ ⊢ₑ s of b
+         → Γ ⊢ₑ s ∶ b
 
-data _⊢B_▹_ {n m : ℕ} (Γ : Ctx n) : Behaviour →  Ctx m → Set where
-  t-nil : {n≡m : n ≡ m}
+data _⊢B_▹_ {n m : ℕ} (Γ : Ctx n) : Behaviour → Ctx m → Set where
+  t-nil : (n≡m : n ≡ m)
         ---------------------------
         → Γ ⊢B nil ▹ subst Ctx n≡m Γ
           
-  t-if : {Γ₁ : Ctx m} {b1 b2 : Behaviour} {e : Variable}
-       → Γ ⊢ e ∶ bool -- Γ ⊢ e : bool
+  t-if : {Γ₁ : Ctx m} {b1 b2 : Behaviour} {e : Expr}
+       → Γ ⊢ₑ e ∶ bool -- Γ ⊢ e : bool
        → Γ ⊢B b1 ▹ Γ₁
        → Γ ⊢B b2 ▹ Γ₁
        ---------------------------
-       → Γ ⊢B if (var e) b1 b2 ▹ Γ₁
+       → Γ ⊢B if e b1 b2 ▹ Γ₁
           
   t-while : {n≡m : n ≡ m} {b : Behaviour} {e : Variable}
           → Γ ⊢ e ∶ bool
@@ -71,14 +71,14 @@ data _⊢B_▹_ {n m : ℕ} (Γ : Ctx n) : Behaviour →  Ctx m → Set where
                  → Γ ⊢B output (notification o l (var e)) ▹ subst Ctx n≡m Γ
 
   t-assign-new : {Γ₁ : Ctx m} {x : Variable} {e : Expr} {Tₓ Tₑ : Type}
-               → Γ ⊢ₑ e of Tₑ -- Γ ⊢ e : bool
+               → Γ ⊢ₑ e ∶ Tₑ -- Γ ⊢ e : bool
                → ¬ (var x Tₓ ∈ Γ) -- x ∉ Γ
                → (var x Tₑ) ∈ Γ₁
                ---------------------
                → Γ ⊢B assign x e ▹ Γ₁
 
   t-assign-exists : {n≡m : n ≡ m} {x : Variable} {e : Expr} {Tₓ Tₑ : Type}
-                  → Γ ⊢ₑ e of Tₑ
+                  → Γ ⊢ₑ e ∶ Tₑ
                   → (var x Tₓ) ∈ Γ
                   → Tₑ ≡ Tₓ
                   ---------------------
@@ -135,4 +135,18 @@ data _⊢B_▹_ {n m : ℕ} (Γ : Ctx n) : Behaviour →  Ctx m → Set where
                    → Γ ⊢B (input (reqres o x a b)) ▹ Γ₁
 
 check-B : {n m : ℕ} {Γ₁ : Ctx m} → (Γ : Ctx n) → (b : Behaviour) → Dec (Γ ⊢B b ▹ Γ₁)
-check-B = {!!}
+check-B {n} {m} {Γ₁} Γ (if e b1 b2) with check-B Γ b1 | check-B Γ b2
+... | yes ctx₁ | yes ctx₂ = yes (t-if expr-t ctx₁ ctx₂)
+... | yes _ | no ¬p = no lem
+  where
+    lem : ¬ Γ ⊢B if e b1 b2 ▹ Γ₁
+    lem (t-if _ _ c₂) = ¬p c₂
+... | no ¬p | yes _ = no lem
+  where
+    lem : ¬ Γ ⊢B if e b1 b2 ▹ Γ₁
+    lem (t-if _ c₁ _) = ¬p c₁
+... | no _ | no ¬2 = no lem
+  where
+    lem : ¬ Γ ⊢B if e b1 b2 ▹ Γ₁
+    lem (t-if _ _ c₂) = ¬2 c₂
+check-B Γ b = {!!}
